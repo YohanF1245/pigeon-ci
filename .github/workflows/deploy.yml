@@ -1,0 +1,60 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches:
+      - deploy
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          load: true
+          tags: pigeon-ci:latest
+
+      - name: Save Docker image
+        run: docker save pigeon-ci:latest > image.tar
+
+      - name: Copy image to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          source: "image.tar"
+          target: "~/pigeon-ci"
+
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            cd ~/pigeon-ci
+            
+            # Charger l'image
+            docker load < image.tar
+            rm image.tar
+            
+            # Arrêter et supprimer l'ancien conteneur
+            docker stop pigeon-ci || true
+            docker rm pigeon-ci || true
+            
+            # Lancer le nouveau conteneur
+            docker run -d \
+              --name pigeon-ci \
+              -p 3000:3000 \
+              --restart unless-stopped \
+              pigeon-ci:latest 
