@@ -55,6 +55,6 @@ jobs:
             # Lancer le nouveau conteneur
             docker run -d \
               --name pigeon-ci \
-              -p 3000:3000 \
+              -p 80:3000 \
               --restart unless-stopped \
               pigeon-ci:latest 

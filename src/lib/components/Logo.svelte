@@ -39,7 +39,7 @@
     />
   </svg>
   <div class="font-bold leading-none">
-    <div class="text-4xl tracking-tight" style="color: {textColor}">Pigeon</div>
-    <div class="text-lg opacity-80 tracking-widest uppercase mt-2" style="color: {textColor}">Devis</div>
+    <div class="text-6xl tracking-tight" style="color: {textColor}">Pigeon</div>
+    <div class="text-3xl opacity-80 tracking-widest uppercase mt-2" style="color: {textColor}">Devis</div>
   </div>
 </div> 
